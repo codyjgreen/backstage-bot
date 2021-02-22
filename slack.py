@@ -15,8 +15,9 @@ ssl._create_default_https_context = ssl._create_unverified_context
 # WebClient insantiates a client that can call API methods
 # When using Bolt, you can use either `app.client` or the `client` passed to listeners.
 token=os.environ.get("SLACK_BOT_TOKEN")
-if token == None:
-    logger.error("Set SLACK_BOT_TOKEN")
+
+if not token:
+    logger.error("Set SLACK_BOT_TOKEN first")
     exit(-2)
 
 client = WebClient(token=token)
