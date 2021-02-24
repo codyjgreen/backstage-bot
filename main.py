@@ -3,9 +3,6 @@ from slack import get_user_ids, send_mim_msg, send_pub_msg
 from db import db_init, db_add_stars, db_get_matches, db_close
 
 msg_template = '''
-* 테스트 메시지 입니다! 도넛을 대치할 프로그램을 만들고 있으며 매일 하루씩 올라올예정인데 실제 티타임은 안하셔도 됩니다.*
-만나실 분이 반복되거나 뭔가 이상한 점이 있으면 **Sung** 에게 ping해주세요. 테스트를 거쳐 3/5일부터 투입됩니다.\n
-https://github.com/UpstageAI/backstage-bot 로 직접 PR주셔도 좋습니다.\n\n
 <@{}>, <@{}>님을 백스테이지로 초대합니다! :sunglasses::sparkles:\n\n
 한주를 시작하기 전 가볍게 함께 티타임을 가지시는 건 어떨까요?\n
 주말동안 있었던 일, 흥미로운 소식, 나누고 싶은 이야기 등으로 함께 편안한 시간 보내시며,
