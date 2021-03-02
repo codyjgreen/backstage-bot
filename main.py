@@ -7,7 +7,7 @@ msg_template = '''
 한주를 시작하기 전 가볍게 함께 티타임을 가지시는 건 어떨까요?\n
 주말동안 있었던 일, 흥미로운 소식, 나누고 싶은 이야기 등으로 함께 편안한 시간 보내시며,
 이번주도 모두 모두 화이팅할 수 있는 기운을 나눠주세요 :female_superhero::male_superhero::rocket:\n\n
-멋진 시간 보내신 사진등을 #backstage_story 에 올려주세요.\n
+멋진 시간 보내신 사진등을 #backstage-story 에 올려주세요.\n
 '''
 
 pub_msg_template = '''
