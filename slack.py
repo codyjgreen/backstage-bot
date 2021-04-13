@@ -85,7 +85,7 @@ def _retrieve_user_ids(cursor = None):
 '''
 Find the public channel or create one if not exist
 '''
-def get_backstage_channel_id(channel_name="backstage-story"):
+def get_backstage_channel_id(channel_name="all-backstage-story"):
     try:
         # search for channels first
         # FIXME: search channel id using name in slack API?
