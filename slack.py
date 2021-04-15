@@ -9,6 +9,7 @@ from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
 logger = logging.getLogger("slack")
+BACKSTAGE_CHANNEL_NAME = "all-backstage-story"
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -22,70 +23,47 @@ if not token:
 
 client = WebClient(token=token)
 
-# You probably want to use a database to store any user information ;)
-users_store = {}
-
-# Put users into the dict
-def save_users(users_array):
-    for user in users_array:
-        # Key user info on their unique user ID
-        user_id = user["id"]
-        print(user['profile']['real_name'], user_id)
-       
-        # FIXME: No way to remove them from the user list using slack API?
-        if "is_restricted" in user and user["is_restricted"]==True:
-            print(user['profile']['real_name'], "is_restricted")
-            continue
-        
-        if "is_bot" in user and user["is_bot"]==True:
-            print(user['profile']['real_name'], "is_bot")
-            continue
-
-        if "deleted" in user and user["deleted"]==True:
-            print(user['profile']['real_name'], "is_deleted")
-            continue
-
-        # Perhaps slackbot
-        if user['updated'] == 0:
-            print(user['profile']['real_name'], "is_slack_bot?")
-            continue
-
-        # Store the entire user object (you may not need all of the info)
-        users_store[user_id] = user
 
 '''
 retrieve can be multiple calls
 so we call it first, then collect results from users
 '''
+users_store = []
+def get_user_ids(channel_name=BACKSTAGE_CHANNEL_NAME):
+    channel = get_backstage_channel_id()
+    _retrieve_user_ids_in_channel(channel)
+    return users_store
+    
 
-def get_user_ids():
-    _retrieve_user_ids()
-    return list(users_store.keys())  
+def _retrieve_user_ids_in_channel(channel, cursor = None):
+    global users_store
 
-def _retrieve_user_ids(cursor = None):
     try:
         # Call the users.list method using the WebClient
         # users.list requires the users:read scope
-        result = client.users_list(cursor=cursor)
+        result = client.conversations_members(channel=channel, cursor=cursor)
         pprint.pprint(result["response_metadata"])
         next_cursor = result['response_metadata']['next_cursor']
        
-        save_users(result["members"])
+        for member in result["members"]:
+            if not is_bot(member):
+                users_store.append(member)
+                
         if 'next_cursor' in result['response_metadata']:
             next_cursor = result['response_metadata']['next_cursor']
             if next_cursor:
                 print("Next cursor", next_cursor)
                 # Call this recursively
-                _retrieve_user_ids(next_cursor)
+                _retrieve_user_ids_in_channel(channel, cursor=next_cursor)
 
     except SlackApiError as e:
-        logger.error("Error creating conversation: {}".format(e))
+        logger.error("Error getting members: {}".format(e))
 
 
 '''
 Find the public channel or create one if not exist
 '''
-def get_backstage_channel_id(channel_name="all-backstage-story"):
+def get_backstage_channel_id(channel_name=BACKSTAGE_CHANNEL_NAME):
     try:
         # search for channels first
         # FIXME: search channel id using name in slack API?
@@ -104,12 +82,18 @@ def get_backstage_channel_id(channel_name="all-backstage-story"):
         logger.error("Error creating conversation: {}".format(e))
 
     return None
-   
+
+def is_bot(user_id):
+    result = client.users_info(
+        user=user_id
+    )
+    return result['user']['is_bot']
+
+
 def get_realname(user_id):
     result = client.users_info(
         user=user_id
     )
-    print(result)
     return result['user']['profile']['real_name']
 
 def _send_channel_msg(channel_id, msg = "Hello!"):
@@ -160,6 +144,9 @@ def send_mim_msg(star1, star2, msg = "Hello!", channel_id=None):
 
 if __name__ == '__main__':
     #open_mim_send_msg('U017Z0Y2P9P', 'U017FMWG9CJ')
-    print(get_user_ids())
-    r = get_backstage_channel_id()
-    _send_channel_msg(r)
+   ids = get_user_ids()
+   for i, id in enumerate(ids):
+       print(i, id, get_realname(id))
+
+    #r = get_backstage_channel_id()
+    #_send_channel_msg(r)
